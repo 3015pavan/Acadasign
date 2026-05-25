@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useToast } from '@/context/ToastContext';
+import { getApiBaseUrl } from '@/lib/runtime';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function RegisterForm() {
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form) as any);
 
-    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const API = getApiBaseUrl();
     let json: any;
     try {
       const res = await fetch(`${API}/api/auth/register`, {

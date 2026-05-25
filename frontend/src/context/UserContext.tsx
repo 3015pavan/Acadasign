@@ -1,8 +1,9 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getProfile } from '@/lib/api';
+import { getApiBaseUrl } from '@/lib/runtime';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = getApiBaseUrl();
 
 type User = any | null;
 

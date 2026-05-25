@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getApiBaseUrl } from '@/lib/runtime';
 
 type Assignment = {
   _id: string;
@@ -90,7 +91,7 @@ export default function AnalyticsPage() {
                     <Link href={`/output/${assignment._id}`} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
                       View Assignment
                     </Link>
-                    <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/results/${assignment._id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    <a href={`${getApiBaseUrl()}/api/results/${assignment._id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                       <FileText className="h-4 w-4" /> Open JSON
                     </a>
                   </div>

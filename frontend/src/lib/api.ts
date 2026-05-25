@@ -2,9 +2,10 @@ import axios from 'axios';
 import type { AssignmentFormValues } from './validators';
 import { toAssignmentFormData } from './validators';
 import type { GeneratedPaper } from '@/types';
+import { getApiBaseUrl } from './runtime';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
 });
 
@@ -95,7 +96,7 @@ export async function updateProfile(payload: { name?: string; role?: string }) {
 }
 
 export function getPdfUrl(assignmentId: string) {
-  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const base = getApiBaseUrl();
   return `${base}/api/pdf/${assignmentId}`;
 }
 
