@@ -8,11 +8,13 @@ export function OutputActions({
   onDownload,
   onCopyLink,
   regenerating,
+  downloadDisabled,
 }: {
   onRegenerate: () => void;
   onDownload: () => void;
   onCopyLink: () => void;
   regenerating?: boolean;
+  downloadDisabled?: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -20,7 +22,7 @@ export function OutputActions({
         <RotateCcw className={regenerating ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         Regenerate
       </Button>
-      <Button type="button" className="rounded-full" onClick={onDownload}>
+      <Button type="button" className="rounded-full" onClick={onDownload} disabled={downloadDisabled}>
         <Download className="h-4 w-4" />
         Download PDF
       </Button>

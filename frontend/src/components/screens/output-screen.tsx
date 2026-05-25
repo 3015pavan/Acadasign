@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { downloadPdfBlob, getAssignment, getResult, regenerateAssignment } from '@/lib/api';
 import { subscribeToAssignment } from '@/lib/socket';
+import { useToast } from '@/context/ToastContext';
 import { useAssignmentStore } from '@/store/assignmentStore';
 import type { GeneratedPaper } from '@/types';
 
@@ -36,6 +37,7 @@ export function OutputScreen() {
   const setStoreResult = useAssignmentStore((state) => state.setResult);
   const setStoreStatus = useAssignmentStore((state) => state.setStatus);
   const setStoreProgress = useAssignmentStore((state) => state.setProgress);
+  const toast = useToast();
 
   useEffect(() => {
     let cleanup: () => void = () => undefined;
@@ -105,19 +107,34 @@ export function OutputScreen() {
   };
 
   const handleDownload = async () => {
-    const blob = await downloadPdfBlob(assignmentId);
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `${assignment?.title?.trim().replace(/\s+/g, '-') || 'paper'}.pdf`;
-    anchor.style.display = 'none';
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+    if (status !== 'completed') {
+      toast.info('PDF download is available after the paper finishes generating.');
+      return;
+    }
 
-    window.setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1000);
+    try {
+      const blob = await downloadPdfBlob(assignmentId);
+
+      if (!blob.type.includes('pdf')) {
+        const errorText = await blob.text();
+        throw new Error(errorText || 'PDF download failed');
+      }
+
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${assignment?.title?.trim().replace(/\s+/g, '-') || 'paper'}.pdf`;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to download PDF');
+    }
   };
 
   const handleRegenerate = async () => {
@@ -149,7 +166,7 @@ export function OutputScreen() {
                   <Badge variant="muted">{assignment?.totalMarks ?? 0} marks</Badge>
                 </div>
               </div>
-              <OutputActions onRegenerate={handleRegenerate} onDownload={handleDownload} onCopyLink={handleCopy} regenerating={isRegenerating} />
+              <OutputActions onRegenerate={handleRegenerate} onDownload={handleDownload} onCopyLink={handleCopy} regenerating={isRegenerating} downloadDisabled={status !== 'completed'} />
             </div>
           </div>
 

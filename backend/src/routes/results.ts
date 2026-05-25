@@ -7,6 +7,10 @@ import { getCachedPaper } from '../config/redis';
 export const resultsRouter = Router();
 import { requireAuth, requireRole } from '../middleware/requireAuth';
 
+function isAdmin(request: any) {
+  return request.user?.role === 'admin';
+}
+
 resultsRouter.get(
   '/:assignmentId',
   requireAuth,
@@ -16,6 +20,12 @@ resultsRouter.get(
     const assignment = await Assignment.findById(assignmentId).lean() as any;
 
     if (!assignment) {
+      response.status(404).json({ success: false, error: 'Assignment not found' });
+      return;
+    }
+
+    const user = (request as any).user;
+    if (!isAdmin(request) && String(assignment.userId) !== String(user?.sub)) {
       response.status(404).json({ success: false, error: 'Assignment not found' });
       return;
     }

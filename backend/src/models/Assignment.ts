@@ -22,6 +22,7 @@ const difficultySchema = new Schema<DifficultyDistribution>(
 
 const assignmentSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     title: { type: String, required: true },
     subject: { type: String, required: true },
     topic: { type: String, required: true },

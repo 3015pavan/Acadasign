@@ -1,5 +1,13 @@
 import pdfParse from 'pdf-parse';
 
+function isLikelyPdf(buffer: Buffer) {
+  return buffer.length >= 4 && buffer.subarray(0, 4).toString('utf8') === '%PDF';
+}
+
+function extractPlainText(buffer: Buffer) {
+  return buffer.toString('utf8').replace(/\u0000/g, '').trim();
+}
+
 async function extractPdfTextWithPdfJs(buffer: Buffer) {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer), useWorkerFetch: false });
@@ -52,18 +60,33 @@ export async function extractFileContent(file?: Express.Multer.File | null) {
   }
 
   if (file.mimetype === 'text/plain') {
-    return file.buffer.toString('utf8');
+    return extractPlainText(file.buffer) || undefined;
   }
 
-  if (file.mimetype === 'application/pdf') {
-    const parsed = await pdfParse(file.buffer);
-    const primaryText = parsed.text?.replace(/\s+/g, ' ').trim() ?? '';
+  const isPdfMime = file.mimetype === 'application/pdf' || file.mimetype === 'application/x-pdf';
+  if (isPdfMime) {
+    if (!isLikelyPdf(file.buffer)) {
+      const fallbackText = extractPlainText(file.buffer);
+      return fallbackText || undefined;
+    }
+
+    let primaryText = '';
+
+    try {
+      const parsed = await pdfParse(file.buffer);
+      primaryText = parsed.text?.replace(/\s+/g, ' ').trim() ?? '';
+    } catch (error) {
+      console.warn(`PDF parse failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     if (primaryText.length >= 80) {
       return primaryText;
     }
 
-    const fallbackText = await extractPdfTextWithPdfJs(file.buffer).catch(() => '');
+    const fallbackText = await extractPdfTextWithPdfJs(file.buffer).catch((error) => {
+      console.warn(`PDF.js parse failed: ${error instanceof Error ? error.message : String(error)}`);
+      return '';
+    });
     return fallbackText.replace(/\s+/g, ' ').trim() || primaryText || undefined;
   }
 

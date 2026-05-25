@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Filter, Search, Plus, MoreVertical, FileText } from 'lucide-react';
-import api from '@/lib/api';
+import api, { getProfile } from '@/lib/api';
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { getApiBaseUrl } from '@/lib/runtime';
 
 type Assignment = {
   _id: string;
+  userId?: string;
   title: string;
   subject: string;
   status: string;
@@ -21,20 +22,46 @@ type Assignment = {
 
 export default function AnalyticsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    api
-      .get('/api/assignments')
-      .then((r) => setAssignments(r.data.assignments || []))
-      .catch(() => setAssignments([]));
+    let mounted = true;
+
+    void (async () => {
+      try {
+        const [assignmentsResponse, profileResponse] = await Promise.all([api.get('/api/assignments'), getProfile()]);
+        if (!mounted) return;
+
+        setAssignments(assignmentsResponse.data.assignments || []);
+        setCurrentUserId(profileResponse.user?._id ?? profileResponse.user?.id ?? null);
+      } catch {
+        if (!mounted) return;
+
+        setAssignments([]);
+        setCurrentUserId(null);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return assignments;
-    return assignments.filter((assignment) => [assignment.title, assignment.subject, assignment.status].join(' ').toLowerCase().includes(q));
-  }, [assignments, query]);
+    const scopedAssignments = currentUserId
+      ? assignments.filter((assignment) => String(assignment.userId ?? '') === String(currentUserId))
+      : assignments;
+
+    if (!q) return scopedAssignments;
+    return scopedAssignments.filter((assignment) => [assignment.title, assignment.subject, assignment.status].join(' ').toLowerCase().includes(q));
+  }, [assignments, currentUserId, query]);
 
   return (
     <AppShell title="Assignments" backHref="/" showCreateButton>
@@ -67,7 +94,11 @@ export default function AnalyticsPage() {
             </div>
           </Card>
 
-          {filtered.length ? (
+          {loading ? (
+            <Card className="glass-gray border-slate-200/70 p-10 text-center text-sm text-slate-600">
+              Loading assignments...
+            </Card>
+          ) : filtered.length ? (
             <div className="grid gap-4 xl:grid-cols-2">
               {filtered.map((assignment) => (
                 <Card key={assignment._id} className="glass-gray group border-slate-200/70 p-5 transition-transform duration-200 hover:-translate-y-0.5">

@@ -45,8 +45,19 @@ function normalizeBody(body: Record<string, unknown>) {
 
 export const assignmentsRouter = Router();
 
+function getAccessScope(request: any) {
+  const role = request.user?.role;
+  const userId = request.user?.sub;
+
+  if (role === 'admin') {
+    return {};
+  }
+
+  return userId ? { userId } : { userId: '__unscoped__' };
+}
+
 assignmentsRouter.get('/', requireAuth, requireRole('teacher'), asyncHandler(async (_req, res) => {
-  const assignments = await Assignment.find().sort({ createdAt: -1 }).lean();
+  const assignments = await Assignment.find(getAccessScope(_req)).sort({ createdAt: -1 }).lean();
   res.json({ success: true, assignments });
 }),
 );
@@ -61,8 +72,15 @@ assignmentsRouter.post(
     const parsed = assignmentFormSchema.parse(normalizedBody);
     const fileContent = await extractFileContent(request.file);
     const jobId = randomUUID();
+    const userId = (request as any).user?.sub;
+
+    if (!userId) {
+      response.status(401).json({ success: false, error: 'Unauthorized' });
+      return;
+    }
 
     const assignment = await Assignment.create({
+      userId,
       ...parsed,
       fileContent,
       status: 'pending',
@@ -95,6 +113,12 @@ assignmentsRouter.post(
       return;
     }
 
+    const user = (request as any).user;
+    if (user?.role !== 'admin' && String(assignment.userId) !== String(user?.sub)) {
+      response.status(404).json({ success: false, error: 'Assignment not found' });
+      return;
+    }
+
     await Assignment.findByIdAndUpdate(assignment._id, { status: 'pending' });
 
     try {
@@ -116,6 +140,12 @@ assignmentsRouter.get(
     const assignment = await Assignment.findById(request.params.id).lean();
 
     if (!assignment) {
+      response.status(404).json({ success: false, error: 'Assignment not found' });
+      return;
+    }
+
+    const user = (request as any).user;
+    if (user?.role !== 'admin' && String((assignment as any).userId) !== String(user?.sub)) {
       response.status(404).json({ success: false, error: 'Assignment not found' });
       return;
     }

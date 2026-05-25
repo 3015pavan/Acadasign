@@ -20,6 +20,12 @@ pdfRouter.get(
       return;
     }
 
+    const user = (request as any).user;
+    if (user?.role !== 'admin' && String(assignment.userId) !== String(user?.sub)) {
+      response.status(404).json({ success: false, error: 'Paper not available yet' });
+      return;
+    }
+
     const html = buildPrintablePaperHtml(assignment as never, result.paper as never);
     const pdfBuffer = await renderPdfBuffer(html);
 
