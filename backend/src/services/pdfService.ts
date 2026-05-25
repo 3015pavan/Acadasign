@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import PDFDocument from 'pdfkit';
 import type { AssignmentFormData, GeneratedPaper } from '../types';
 
 function difficultyClass(level: string) {
@@ -113,19 +113,105 @@ export function buildPrintablePaperHtml(assignment: AssignmentFormData, paper: G
   `;
 }
 
-export async function renderPdfBuffer(html: string) {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    ...(process.env.PUPPETEER_EXECUTABLE_PATH ? { executablePath: process.env.PUPPETEER_EXECUTABLE_PATH } : {}),
-    ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
-  });
+export async function renderPdfBuffer(assignment: AssignmentFormData, paper: GeneratedPaper) {
+  return await new Promise<Buffer>((resolve, reject) => {
+    const doc = new PDFDocument({ size: 'A4', margin: 40 });
+    const chunks: Buffer[] = [];
 
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'load' });
-    return await page.pdf({ format: 'A4', printBackground: true });
-  } finally {
-    await browser.close();
-  }
+    doc.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    const usableWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+    const ensureSpace = (height: number) => {
+      if (doc.y + height > doc.page.height - doc.page.margins.bottom) {
+        doc.addPage();
+      }
+    };
+
+    const drawDivider = () => {
+      doc.moveTo(doc.page.margins.left, doc.y)
+        .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+        .lineWidth(1)
+        .strokeColor('#e5e7eb')
+        .stroke();
+      doc.moveDown(1);
+    };
+
+    const drawMetaRow = (entries: Array<[string, string]>) => {
+      const startY = doc.y;
+      const columnWidth = usableWidth / entries.length;
+      const rowHeight = 18;
+      ensureSpace(rowHeight + 8);
+
+      entries.forEach(([label, value], index) => {
+        const x = doc.page.margins.left + index * columnWidth;
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(`${label}:`, x, startY, { width: 70, continued: true });
+        doc.font('Helvetica').fontSize(11).fillColor('#334155').text(` ${value}`, x + 72, startY, { width: columnWidth - 72 });
+      });
+
+      doc.y = startY + rowHeight;
+      doc.moveDown(0.8);
+    };
+
+    const drawQuestion = (question: GeneratedPaper['sections'][number]['questions'][number]) => {
+      const requiredHeight = 54 + (question.options?.length ?? 0) * 14;
+      ensureSpace(requiredHeight);
+
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(`Q${question.number}. ${question.text}`, {
+        width: usableWidth,
+      });
+      doc.moveDown(0.15);
+
+      doc.font('Helvetica').fontSize(10).fillColor('#334155').text(`Difficulty: ${question.difficulty.toUpperCase()}   Marks: ${question.marks}`, {
+        width: usableWidth,
+      });
+
+      if (question.options?.length) {
+        doc.moveDown(0.15);
+        question.options.forEach((option) => {
+          doc.font('Helvetica').fontSize(10).fillColor('#334155').text(`• ${option}`, {
+            indent: 12,
+            width: usableWidth - 12,
+          });
+        });
+      }
+
+      doc.moveDown(0.5);
+    };
+
+    doc.fillColor('#0f172a');
+    doc.font('Helvetica-Bold').fontSize(20).text(`${assignment.subject} Assessment`, { align: 'center' });
+    doc.moveDown(0.2);
+    doc.font('Helvetica').fontSize(12).fillColor('#475569').text(paper.title, { align: 'center' });
+    doc.moveDown(0.8);
+    drawDivider();
+
+    drawMetaRow([
+      ['Grade', paper.gradeLevel],
+      ['Duration', `${paper.duration} minutes`],
+      ['Total Marks', String(paper.totalMarks)],
+    ]);
+
+    drawMetaRow([
+      ['Student Name', '____________________'],
+      ['Roll No', '__________'],
+      ['Section', '__________'],
+    ]);
+
+    paper.sections.forEach((section) => {
+      ensureSpace(48);
+      doc.font('Helvetica-Bold').fontSize(15).fillColor('#0f172a').text(section.title, { width: usableWidth });
+      doc.moveDown(0.15);
+      doc.font('Helvetica').fontSize(10).fillColor('#64748b').text(section.instruction, { width: usableWidth });
+      doc.moveDown(0.5);
+
+      section.questions.forEach((question) => drawQuestion(question));
+
+      doc.moveDown(0.4);
+    });
+
+    doc.end();
+  });
 }

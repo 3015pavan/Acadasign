@@ -3,7 +3,7 @@ import { asyncHandler } from '../lib/asyncHandler';
 import { Assignment } from '../models/Assignment';
 import { Result } from '../models/Result';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
-import { buildPrintablePaperHtml, renderPdfBuffer } from '../services/pdfService';
+import { renderPdfBuffer } from '../services/pdfService';
 
 export const pdfRouter = Router();
 
@@ -26,8 +26,7 @@ pdfRouter.get(
       return;
     }
 
-    const html = buildPrintablePaperHtml(assignment as never, result.paper as never);
-    const pdfBuffer = await renderPdfBuffer(html);
+    const pdfBuffer = await renderPdfBuffer(assignment as never, result.paper as never);
 
     response.setHeader('Content-Type', 'application/pdf');
     response.setHeader('Content-Disposition', 'attachment; filename="paper.pdf"');
