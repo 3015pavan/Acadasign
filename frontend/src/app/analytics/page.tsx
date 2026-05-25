@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="truncate text-xl font-semibold text-slate-900">{assignment.title}</h2>
-                        <Badge variant={assignment.status === 'completed' ? 'muted' : 'secondary'}>{assignment.status}</Badge>
+                        <Badge variant={assignment.status === 'completed' ? 'muted' : 'default'}>{assignment.status}</Badge>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-600">
                         <Badge variant="muted">{assignment.subject}</Badge>
