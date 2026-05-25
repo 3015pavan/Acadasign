@@ -19,14 +19,14 @@ async function bootstrap() {
   await connectRedis();
 
   const app = express();
-  // Allow the frontend origin plus common localhost dev origins.
-  const allowedOrigins = [env.FRONTEND_URL, 'http://localhost:3001', 'http://127.0.0.1:3001'];
+  // Allow the configured frontend origin, localhost dev origins, and any Vercel preview/prod origin.
+  const allowedOrigins = [env.FRONTEND_URL, 'http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'];
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow non-browser requests like curl/postman (no origin)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
+        if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) return callback(null, true);
         return callback(new Error('CORS policy: Origin not allowed'));
       },
       credentials: true,
