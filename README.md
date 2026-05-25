@@ -398,6 +398,27 @@ flowchart LR
 4. Add MongoDB, Redis, and AI secrets in the backend environment.
 5. Point `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WS_URL` to the backend URL.
 6. Point `FRONTEND_URL` to the deployed frontend URL.
+
+---
+
+## Migration & Redeploy (Quick Steps)
+
+If you see legacy assignments appearing across accounts or `/api/pdf` returning 500s after deployment, perform these steps on your backend host:
+
+- Ensure the latest `main` is deployed (pull `origin/main` and restart the service).
+- Flag legacy assignments (those created before `userId` was enforced) so they don't surface to regular users:
+
+```bash
+# from the repository root, with proper env vars set (MONGO_URI or MONGODB_URI)
+cd backend
+node scripts/migrate-legacy-assignments.js
+```
+
+- After migration, restart the backend so route protections and the PDF fallback are active.
+- Monitor server logs for `Primary PDF renderer failed` warnings — the emergency fallback is enabled and will return a simple PDF when the primary renderer fails.
+
+Contact the maintainer if you need a one-off data migration that assigns legacy documents to specific owners.
+
 7. Confirm WebSocket upgrade support and PDF downloads.
 
 ### Production Commands
