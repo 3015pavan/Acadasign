@@ -6,7 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "prebuild": "npm ci --include=dev",
     "build": "tsc -p tsconfig.json",
-    "start": "node start.js",
+    "start": "node dist/index.js",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
