@@ -40,20 +40,6 @@ The goal is simple: make assessment generation feel like a modern AI product, no
 
 ---
 
-## Problem Statement
-
-Schools and teachers usually face the same bottlenecks:
-
-- Manual question writing is slow.
-- Formatting papers and answer keys is repetitive.
-- Uploaded screenshots or scanned notes are often unusable without OCR.
-- PDF exports fail when authentication is not handled correctly.
-- Generated questions can become generic if the model is not grounded properly.
-
-VedaAI solves these by grounding generation in source material, adding OCR support, enforcing structured outputs, and exposing a clean production pipeline.
-
----
-
 ## Architecture
 
 ```mermaid
