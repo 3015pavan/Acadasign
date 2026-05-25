@@ -13,14 +13,31 @@ import { getApiBaseUrl } from '@/lib/runtime';
 
 type Assignment = {
   _id: string;
+  userId?: string;
   title: string;
   subject: string;
   status: string;
   createdAt: string;
 };
 
+function getTokenSubject() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const token = window.localStorage.getItem('vedaai_token');
+    if (!token) return null;
+    const payload = JSON.parse(window.atob(token.split('.')[1] ?? '')) as { sub?: string };
+    return payload.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default function AnalyticsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
 
@@ -33,10 +50,12 @@ export default function AnalyticsPage() {
         if (!mounted) return;
 
         setAssignments(assignmentsResponse.data.assignments || []);
+        setCurrentUserId(getTokenSubject());
       } catch {
         if (!mounted) return;
 
         setAssignments([]);
+        setCurrentUserId(null);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -51,9 +70,13 @@ export default function AnalyticsPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return assignments;
-    return assignments.filter((assignment) => [assignment.title, assignment.subject, assignment.status].join(' ').toLowerCase().includes(q));
-  }, [assignments, query]);
+    const scopedAssignments = currentUserId
+      ? assignments.filter((assignment) => String(assignment.userId ?? '') === String(currentUserId))
+      : [];
+
+    if (!q) return scopedAssignments;
+    return scopedAssignments.filter((assignment) => [assignment.title, assignment.subject, assignment.status].join(' ').toLowerCase().includes(q));
+  }, [assignments, currentUserId, query]);
 
   return (
     <AppShell title="Assignments" backHref="/" showCreateButton>

@@ -3,7 +3,7 @@ import { asyncHandler } from '../lib/asyncHandler';
 import { Assignment } from '../models/Assignment';
 import { Result } from '../models/Result';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
-import { renderPdfBuffer } from '../services/pdfService';
+import { renderEmergencyPdfBuffer, renderPdfBuffer } from '../services/pdfService';
 
 export const pdfRouter = Router();
 
@@ -26,7 +26,13 @@ pdfRouter.get(
       return;
     }
 
-    const pdfBuffer = await renderPdfBuffer(assignment as never, result.paper as never);
+    let pdfBuffer;
+    try {
+      pdfBuffer = await renderPdfBuffer(assignment as never, result.paper as never);
+    } catch (error) {
+      console.warn(`Primary PDF renderer failed: ${error instanceof Error ? error.message : String(error)}`);
+      pdfBuffer = await renderEmergencyPdfBuffer(assignment as never, result.paper as never);
+    }
 
     response.setHeader('Content-Type', 'application/pdf');
     response.setHeader('Content-Disposition', 'attachment; filename="paper.pdf"');

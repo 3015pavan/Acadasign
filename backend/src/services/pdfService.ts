@@ -215,3 +215,45 @@ export async function renderPdfBuffer(assignment: AssignmentFormData, paper: Gen
     doc.end();
   });
 }
+
+export async function renderEmergencyPdfBuffer(assignment: AssignmentFormData, paper: GeneratedPaper) {
+  return await new Promise<Buffer>((resolve, reject) => {
+    const doc = new PDFDocument({ size: 'A4', margin: 40 });
+    const chunks: Buffer[] = [];
+
+    doc.on('data', (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    doc.font('Helvetica-Bold').fontSize(18).fillColor('#0f172a').text(`${assignment.subject} Assessment`, { align: 'center' });
+    doc.moveDown(0.5);
+    doc.font('Helvetica').fontSize(11).fillColor('#334155').text(paper.title, { align: 'center' });
+    doc.moveDown(1);
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(`Grade: ${paper.gradeLevel}`);
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(`Duration: ${paper.duration} minutes`);
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(`Total Marks: ${paper.totalMarks}`);
+    doc.moveDown(1);
+
+    paper.sections.forEach((section) => {
+      doc.font('Helvetica-Bold').fontSize(13).fillColor('#0f172a').text(section.title);
+      doc.font('Helvetica').fontSize(10).fillColor('#64748b').text(section.instruction);
+      doc.moveDown(0.35);
+
+      section.questions.forEach((question) => {
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#0f172a').text(`Q${question.number}. ${question.text}`);
+        doc.font('Helvetica').fontSize(9).fillColor('#334155').text(`Difficulty: ${question.difficulty.toUpperCase()} | Marks: ${question.marks}`);
+        if (question.options?.length) {
+          question.options.forEach((option) => {
+            doc.font('Helvetica').fontSize(9).fillColor('#334155').text(`- ${option}`, { indent: 12 });
+          });
+        }
+        doc.moveDown(0.4);
+      });
+
+      doc.moveDown(0.5);
+    });
+
+    doc.end();
+  });
+}
