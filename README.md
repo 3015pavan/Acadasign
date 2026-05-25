@@ -322,7 +322,7 @@ Create `frontend/.env.local` manually with the frontend values below.
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/vedaai
+MONGODB_URI=mongodb+srv://301pavan2005_db_user:teq2ePJdJ3d238Nk@clustero.ztoyfcs.mongodb.net/?appName=Cluster
 REDIS_URL=redis://localhost:6380
 GEMINI_API_KEY=
 ANTHROPIC_API_KEY=
