@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* White glass palette */
+  --background: 210 20% 98%;
+  --foreground: 222 24% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 24% 13%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 24% 13%;
+  --primary: 222 24% 13%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 18% 96%;
+  --secondary-foreground: 222 24% 13%;
+  --muted: 210 18% 96%;
+  --muted-foreground: 215 18% 26%;
+  --accent: 215 20% 92%;
+  --accent-foreground: 222 24% 13%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214 14% 72%;
+  --input: 214 14% 72%;
+  --ring: 215 18% 48%;
+
+  /* Mixed gray + glass + very light orange / very light brown accents */
+  --brown-5: 28 95% 99%; /* very very light brown */
+  --brown-50: 30 92% 97%;
+  --brown-100: 28 86% 94%;
+  --brown-200: 30 78% 90%;
+  --brown-accent-foreground: 28 22% 12%;
+  --brown-accent-foreground-weak: 28 26% 18%;
+  --glass-accent-rgba: 236, 231, 223; /* warm-tinted glass border */
+  /* light blue + light orange accents for glass mixes */
+  --blue-5: 210 95% 98%;
+  --blue-50: 210 92% 96%;
+  --blue-100: 205 85% 92%;
+  --orange-5: 30 95% 98%;
+  --orange-50: 28 92% 96%;
+  --glass-mix-rgba: 235, 241, 247; /* cool glass tint */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.95), transparent 22%),
+    radial-gradient(circle at right center, rgba(226,232,240,0.45), transparent 24%),
+    linear-gradient(180deg, hsl(var(--background)) 0%, #eef2f7 100%);
+  color: rgb(var(--foreground));
+  font-family: var(--font-source-serif), Georgia, serif;
+}
+
+/* Glass utility for cards and panels */
+.glass {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(var(--glass-accent-rgba), 0.28);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  backdrop-filter: blur(10px) saturate(1.08);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.20);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(var(--glass-accent-rgba), 0.28);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.24);
+}
+
+.glass-gray {
+  background: rgba(230, 232, 235, 0.96);
+  border: 1px solid rgba(var(--glass-accent-rgba), 0.22);
+  -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  backdrop-filter: blur(10px) saturate(1.02);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.22);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(148, 163, 184, 0.22);
+}
+
+.vedaai-progress {
+  appearance: none;
+  border: 0;
+  color: rgb(30 41 59);
+}
+
+.vedaai-progress::-webkit-progress-bar {
+  background: rgba(226, 232, 240, 0.8);
+  border-radius: 9999px;
+}
+
+.vedaai-progress::-webkit-progress-value {
+  border-radius: 9999px;
+  background: linear-gradient(90deg, hsl(var(--blue-100)), hsl(var(--orange-50)), hsl(var(--brown-200)));
+}
+
+.vedaai-progress::-moz-progress-bar {
+  border-radius: 9999px;
+  background: linear-gradient(90deg, hsl(var(--blue-100)), hsl(var(--orange-50)), hsl(var(--brown-200)));
+}
