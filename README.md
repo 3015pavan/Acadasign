@@ -1,4 +1,4 @@
-# VedaAI
+# Acadasign
 
 <p align="center">
   <strong>AI-native assessment creation for modern classrooms.</strong><br />
@@ -16,7 +16,7 @@
 
 ## Overview
 
-VedaAI is a full-stack AI SaaS for teachers, schools, and education teams that need to create assessment papers quickly without sacrificing quality.
+Acadasign is a full-stack AI SaaS for teachers, schools, and education teams that need to create assessment papers quickly without sacrificing quality.
 
 It combines a polished Next.js experience with an Express backend, BullMQ workers, MongoDB persistence, Redis caching, authenticated PDF generation, Socket.io live updates, and OCR-based source extraction for images and screenshots.
 
