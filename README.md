@@ -20,8 +20,6 @@ Acadasign is a full-stack AI SaaS for teachers, schools, and education teams tha
 
 It combines a polished Next.js experience with an Express backend, BullMQ workers, MongoDB persistence, Redis caching, authenticated PDF generation, Socket.io live updates, and OCR-based source extraction for images and screenshots.
 
-This repository is structured like a real startup product: frontend and backend are split cleanly, the generation pipeline is asynchronous, and the UI is designed to feel premium on desktop and mobile.
-
 ---
 
 ## Product Vision
