@@ -6,11 +6,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Tech%20Stack-Next.js%20%7C%20Node.js%20%7C%20MongoDB%20%7C%20Redis%20%7C%20BullMQ-0f172a?style=for-the-badge" alt="Tech Stack" />
-  <img src="https://img.shields.io/badge/Status-Beta%20%7C%20Production--ready%20core-7c5c46?style=for-the-badge" alt="Status" />
-  <img src="https://img.shields.io/badge/PRs-Welcome-16a34a?style=for-the-badge" alt="PRs Welcome" />
-  <img src="https://img.shields.io/badge/License-Private%20%2F%20TBD-64748b?style=for-the-badge" alt="License" />
-</p>
+  <img src="https://img.shields.io/badge/Tech%20Stack-React.js%20%7C%20Next.js%20%7C%20Node.js%20%7C%20MongoDB%20%7C%20Redis%20%7C%20BullMQ-0f172a?style=for-the-badge" alt="Tech Stack" />
+
 
 ---
 
