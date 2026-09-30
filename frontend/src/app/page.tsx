@@ -12,7 +12,7 @@ export default function Page() {
           <div className="flex items-center gap-4">
             <div className="rounded-2xl glass-strong p-3 text-slate-800 font-bold shadow">V</div>
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">VedaAI</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">Acadasign</h1>
               <p className="text-sm text-slate-600">Make assessments beautiful, fair, and fast.</p>
             </div>
           </div>
